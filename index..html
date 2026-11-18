@@ -1,0 +1,144 @@
+<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>OSAKA TRAVEL JOURNAL</title>
+<style>
+:root{--bg:#faf6ee;--c:#fffdf8;--ink:#4a3a2e;--mu:#8b7866;--ln:#e6dccb;--ac:#9fb7c9;--ac2:#c9b49a;--oat:#efe5d3;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#2a2220;--c:#352c28;--ink:#f1e8da;--mu:#b8a792;--ln:#4d413a;--oat:#3f342e;--ac:#7f9bb0}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.7 "Noto Serif TC","Hiragino Mincho ProN",Georgia,serif;max-width:860px;margin:auto}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;gap:6px;overflow-x:auto;padding:10px 14px;background:var(--bg);border-bottom:1px solid var(--ln)}
+nav button,.chip,.btn{font:inherit;font-size:13px;border:1px solid var(--ln);background:var(--c);color:var(--ink);border-radius:20px;padding:5px 14px;cursor:pointer;white-space:nowrap;text-decoration:none;display:inline-block}
+nav button.on,.chip.on,.btn.p{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+section{display:none;padding:18px 16px 60px}section.on{display:block}
+.hero{border-radius:22px;padding:56px 22px;background:linear-gradient(160deg,var(--ac),var(--oat) 70%);text-align:center;margin-bottom:18px}
+.hero h1{letter-spacing:.2em;font-weight:400;margin:6px 0;font-size:26px}.hero small{letter-spacing:.3em;color:var(--mu)}
+.card{background:var(--c);border:1px solid var(--ln);border-radius:18px;padding:14px 16px;margin:12px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.tl{border-left:1px solid var(--ac2);margin:14px 0 0 8px;padding-left:16px}.it{position:relative;margin-bottom:18px}
+.it:before{content:"";position:absolute;left:-21px;top:8px;width:9px;height:9px;border-radius:50%;background:var(--ac2)}.it.r:before{background:var(--ac)}
+.tm{font-size:12px;color:var(--mu);letter-spacing:.08em}.it h3{margin:0;font-weight:600;font-size:16px}.nt{color:var(--mu);font-size:13.5px;margin:3px 0}
+.ph{height:64px;border-radius:12px;margin:6px 0;background:linear-gradient(120deg,var(--oat),var(--ac2));opacity:.6;display:flex;align-items:center;justify-content:center;color:var(--ink);font-size:12px}
+.warn{background:#f6e7c8;color:#5a4320;border-radius:12px;padding:8px 12px;font-size:13px;margin:8px 0}
+input,select{font:inherit;font-size:14px;padding:6px 10px;border:1px solid var(--ln);border-radius:10px;background:var(--c);color:var(--ink);max-width:100%}
+.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:6px 0}table{width:100%;border-collapse:collapse;font-size:13px}td input,td select{width:100%;min-width:56px;font-size:12px;padding:3px 4px}td,th{padding:6px 4px;border-bottom:1px solid var(--ln);text-align:left}
+h2{font-weight:400;letter-spacing:.12em;margin:4px 0 10px}a{color:inherit}.x{cursor:pointer;color:var(--mu);border:0;background:none;font-size:14px}
+</style></head><body>
+<nav id="nav"></nav>
+<section id="home"><div class="hero"><small>2026.12.14 — 2026.12.20</small><h1>OSAKA TRAVEL JOURNAL</h1><small>大阪・京都・梅田・神戶</small></div>
+<div class="card">七天六夜，從神戶機場入境，住難波（APA）與神戶，以電車、巴士、計程車與步行移動，行程節奏放慢，累了就休息。</div>
+<div class="grid"><div class="card">天數<br>7 天 6 夜</div><div class="card">住宿城市<br>大阪難波・神戶</div><div class="card">交通<br>電車・巴士・計程車</div><div class="card">倒數<br><span id="cd"></span></div></div>
+<h2>快速導覽</h2><div class="row" id="qn"></div>
+<h2>待確認事項</h2><div id="flags"></div></section>
+<section id="plan"><div class="row" id="chips"></div><div id="day"></div></section>
+<section id="budget"><h2>花費記錄</h2><div id="msg" class="warn" style="display:none"></div><div class="card"><div class="row">匯率 1 JPY = <input id="rate" type="number" step="0.001" size="6" style="width:90px"> TWD</div><div class="row">出錢的人 <input id="p1" style="width:80px"> <input id="p2" style="width:80px"></div><div id="sum"></div></div>
+<div class="card"><div class="row"><select id="cat"></select><input id="ds" placeholder="說明" style="width:120px"><input id="am" type="number" placeholder="金額" style="width:90px"><select id="cu"><option>JPY</option><option>TWD</option></select><select id="who"></select><button class="btn p" id="add">新增</button></div><table id="tb"></table></div></section>
+<section id="list"><h2>旅行清單</h2><div class="row"><input id="ni" placeholder="新增項目"><select id="ng"></select><button class="btn p" id="na">新增</button></div><div id="ls"></div></section>
+<section id="weather"><h2>天氣</h2><div class="card">此頁面無法串接即時天氣，以下為可靠的查詢連結（不顯示虛構數據）。12 月大阪偏冷，請準備保暖與防風衣物；出發前一天再查一次降雪、風速與警報。</div><div id="wl"></div></section>
+<script>
+// ===== 可自行修改的資料區：[時間,名稱,說明,Google地圖搜尋字,類型(r=餐廳)] =====
+const DAYS=[
+{d:"12/14（一）",t:"抵達神戶→大阪→心齋橋、道頓堀",stay:"APA度假飯店 大阪難波站前塔樓（1-2-13 Minatomachi, Naniwa Ward, Osaka 556-0017）已訂房｜入住 15:00・退房 11:00",items:[
+["11:45–15:00","入境、搭車、到飯店","航班 JX1834 台北 08:30 → 神戶 11:45；神戶機場→三宮→阪神電車大阪難波→飯店","APA Resort Osaka Namba-Eki Mae Tower, 1-2-13 Minatomachi, Naniwa Ward, Osaka 556-0017"],
+["15:30–17:00","心齋橋商店街","慢慢往道頓堀逛，累了就坐下休息","心齋橋筋商店街"],
+["17:00","晚餐：千代松勝蓋飯","1 Chome-1-10 Sennichimae, Chuo Ward, Osaka 542-0074｜電話 +81 6-6212-5920","1 Chome-1-10 Sennichimae, Chuo Ward, Osaka 542-0074","r","每天 11:00–21:30｜均價 ¥2,000–3,000｜Google 3.9★（1,904 則）｜勤勞感謝之日等假日時間可能不同"],
+["18:00–20:00","道頓堀夜景","拍固力果跑跑人、沿河散步；不再排第二頓正餐，有胃口分食章魚燒","道頓堀 グリコ看板"],
+["20:00","一蘭 道頓堀店別館","豚骨拉麵＋半熟蛋，可加替玉；記得找「別館」，本館已公告結束營業。1 Chome-4-16 Dotonbori, Chuo Ward, Osaka 542-0071（千日前商店街）","1 Chome-4-16 Dotonbori, Chuo Ward, Osaka 542-0071","r","24 小時營業｜不接受訂位｜均價 ¥1,000–2,000｜有兒童菜單｜已確認前往別館"]]},
+{d:"12/15（二）",t:"和服→清水寺→三年坂→祇園",stay:"APA度假飯店 大阪難波站前塔樓（1-2-13 Minatomachi, Naniwa Ward, Osaka 556-0017）已訂房｜入住 15:00・退房 11:00",items:[
+["08:30","從飯店出發","搭車前往京都，最後一段可搭計程車到租借店附近","APA Resort Osaka Namba-Eki Mae Tower, 1-2-13 Minatomachi, Naniwa Ward, Osaka 556-0017"],
+["10:30–12:30","Ookini 清水寺店 治裝、拍攝","靠近三年坂；清水寺參拜、拍照，穿和服走得慢，以主要參拜區為主","Ookini 着物レンタル 清水寺店"],
+["13:30","午餐：一寸法師 拉麵","醬油／鹽味、螃蟹拉麵、每日限量10份黑毛和牛沙朗拉麵，可加叉燒飯。4 Chome-148-6 Kiyomizu, Higashiyama Ward, Kyoto 605-0862｜電話 +81 75-741-8070","4 Chome-148-6 Kiyomizu, Higashiyama Ward, Kyoto 605-0862","r","每天 08:00–20:30｜均價 ¥1,000–2,000｜不接受訂位｜有全素餐點、兒童菜單｜Google 4.7★（2,839 則）"],
+["14:30–16:00","三年坂、二年坂、八坂塔","主要拍照時間；若預約攝影師約 1 小時，集合地點先確認","八坂の塔"],
+["16:30","前往 Ookini 八坂神社祇園店 歸還和服","歸還店是八坂神社祇園店，不是清水寺店；Ookini 最晚 17:30 歸還（已確認）","Ookini 着物レンタル 八坂神社 祇園店"],
+["17:30","晚餐：うなぎ・ひつまぶし炭櫓 京都四条河原町店","京都府京都市下京区四条通河原町東入真町68 京都河原町ガーデン FOOD HALL","うなぎ ひつまぶし 炭櫓 京都四条河原町店 京都府京都市下京区四条通河原町東入真町68","r","12/15（二）11:00–15:00（料理最後點餐 14:20）、17:00–21:00（料理最後點餐 20:20）｜基本全年無休，但每年有數次內部培訓休息｜鰻魚售罄會提前關閉｜晚餐 ¥4,000–4,999｜可網上預訂（平日限定午餐菜單需電話預約）｜可刷 Visa、Master、JCB、Amex"],
+["19:00–20:00","前往祇園","晚餐後到祇園一帶走走","花見小路通 祇園"],
+["20:30","回程","返回大阪難波","大阪難波駅"]]},
+
+{d:"12/16（三）",t:"勝尾寺→梅田",stay:"APA度假飯店 大阪難波站前塔樓（1-2-13 Minatomachi, Naniwa Ward, Osaka 556-0017）已訂房｜入住 15:00・退房 11:00",items:[
+["08:00","飯店出發","08:00–09:30 搭車前往：飯店→箕面萱野→巴士或計程車→勝尾寺","箕面萱野駅"],
+["09:30–12:00","勝尾寺","水蜜桃軟糖、雞蛋糕必吃","勝尾寺"],
+["12:00–13:30","下山、前往梅田","隨身帶小點心","梅田駅"],
+["13:30","午餐：焼肉こじま離れ 大阪梅田","〒530-0014 大阪市北區鶴野町4-4 コープ野村梅田A棟1F（阪急梅田走路10分）；招牌A5黑毛和牛漢堡排，有訂位更順｜電話 +81 6-6940-6550","〒530-0014 Osaka, Kita Ward, Tsurunocho 4-4 A棟1F","r","12/16（三）11:30–14:30、17:00–22:30｜均價 ¥1,000–6,000｜Google 顯示可訂位｜13:30 到店，午餐 14:30 結束，最後點餐時間請確認"],
+["15:30","阪急百貨、LUCUA 購物","","LUCUA osaka"],
+["17:00","grenier 梅田店","爆漿烤布蕾千層當下午茶。530-0017 Osaka, Kita Ward, Kakudacho 8 阪急グランドビル1F（阪急SUN廣場）","〒530-0017 Osaka, Kita Ward, Kakudacho 8 Hankyu Grand Building 1F","r","每天 10:00–20:00｜Google 4.5★（1,099 則）"],
+["18:00","晚餐：らぁ麺もう利 梅田店","頂級雞白湯拉麵＋叉燒丼。〒530-0001 Umeda 1-1-3 大阪駅前第3ビル B2","〒530-0001 Osaka, Kita Ward, Umeda 1 Chome-1-3 Osaka Station 3 Building B2","r","12/16（三）11:00–15:00、17:00–22:00（週日休息）｜只收現金・不接受訂位｜均價 ¥1,000–2,000｜Google 4.0★（366 則）"],
+["20:00","梅田空中庭園","展望台，只開放到 22:30","梅田スカイビル 空中庭園展望台"],
+["21:30","手打うどん 香川 北新地店","咖哩烏龍麵、關東煮；吃完回飯店。〒530-0002 曽根崎新地1-5-25 永楽ビル1F","〒530-0002 Osaka, Kita Ward, Sonezakishinchi 1 Chome-5-25","r","12/16（三）18:00–02:30（週日休息，週六 18:00–01:30）｜均價 ¥1,000–2,000｜Google 4.4★（622 則）"]]},
+{d:"12/17（四）",t:"心齋橋購物＋牛丸生日晚餐 🎂",stay:"APA度假飯店 大阪難波站前塔樓（1-2-13 Minatomachi, Naniwa Ward, Osaka 556-0017）已訂房｜入住 15:00・退房 11:00",items:[
+["09:00–10:30","早餐、打扮","這天不安排遠程景點","APA Resort Osaka Namba-Eki Mae Tower, 1-2-13 Minatomachi, Naniwa Ward, Osaka 556-0017"],
+["11:30–12:30","午餐：麵匠之心 Tsuru Tontan 宗右衛門町店","烏龍麵。大阪府大阪市中央区宗右衛門町3-17","大阪府大阪市中央区宗右衛門町3-17 つるとんたん","r","12/17（四）11:00–06:00（週五六至 08:00）｜全年無休｜均價 ¥1,000–1,999｜可網上預訂｜不接受信用卡，請備現金"],
+["13:00–14:30","心齋橋購物","","心齋橋筋商店街"],
+["14:30–15:30","Rikuro 難波本店吃蛋糕","想坐下吃選咖啡室；外帶則換成咖啡休息，蛋糕少量。3 Chome-2-28 Namba, Chuo Ward, Osaka 542-0076","3 Chome-2-28 Namba, Chuo Ward, Osaka 542-0076","r","每天 09:00–20:00"],
+["15:30–16:30","回飯店休息、放購物袋","","APA Resort Osaka Namba-Eki Mae Tower, 1-2-13 Minatomachi, Naniwa Ward, Osaka 556-0017"],
+["17:30–19:30","生日晚餐：牛丸 心齋橋","大阪市中央區東心齋橋2-8-26 FUKU BLD.2樓B號。含稅每人：和牛吃到飽¥7,700／神戶牛吃到飽¥12,000／蟹＋和牛¥9,900。訂位前看清肉品、時間限制、飲料是否另計；官方未列慶祝服務，座位樓層、電梯、不便盤腿坐需求訂位時確認","牛丸 心齋橋","r","12/17（四）17:00–24:00（料理最後點餐 23:00，飲料 23:30）｜晚餐預算 ¥8,000–9,999｜可網上預訂；需要無麩質請先致電餐廳｜預訂頁註明假日前後公休，12/17 不在日本假日前後"],
+["19:30 後","道頓堀散步、生日合照","累了直接回飯店","道頓堀"]]},
+{d:"12/18（五）",t:"難波八阪神社→黑門市場→新世界",stay:"APA度假飯店 大阪難波站前塔樓（1-2-13 Minatomachi, Naniwa Ward, Osaka 556-0017）已訂房｜入住 15:00・退房 11:00",items:[
+["09:00–09:45","飯店出發","散步前往難波八阪神社","APA Resort Osaka Namba-Eki Mae Tower, 1-2-13 Minatomachi, Naniwa Ward, Osaka 556-0017"],
+["09:45–10:30","難波八阪神社","巨大獅子殿；早餐留點胃口","難波八阪神社"],
+["10:30–11:30","黑門市場散策","豆漿、水果、小份海鮮串燒","黑門市場"],
+["11:30–12:45","午餐：DEKASAN 厚蛋三明治","3 Chome-5-17 Kawarayamachi, Chuo Ward, Osaka 542-0066｜電話 +81 6-6777-9775","3 Chome-5-17 Kawarayamachi, Chuo Ward, Osaka 542-0066","r","每天 11:00–18:00｜均價 ¥1,000–2,000｜Google 3.6★（219 則）"],
+["12:45–16:30","心齋橋・道頓堀逛街","","心齋橋"],
+["16:30–17:00","地鐵前往新世界","御堂筋線至動物園前站","動物園前駅"],
+["17:00–18:30","通天閣與聖誕燈飾","入夜霓虹與冬季佈置","通天閣"],
+["18:30–20:00","晚餐：新世界 Kawachiya 本店（串炸）","從御堂筋線／堺筋線「動物園前」站步行約 5 分鐘","新世界 Kawachiya 本店 串炸","r","每天 11:00–24:00｜均價 ¥2,000–2,999｜可網上預訂｜可刷 Visa、Master、JCB、Amex、Diners"],
+["20:00 後","返回飯店休息","","APA Resort Osaka Namba-Eki Mae Tower, 1-2-13 Minatomachi, Naniwa Ward, Osaka 556-0017"]]},
+{d:"12/19（六）",t:"大阪退房→神戶→南京町→港邊",stay:"神戶三宮科科飯店（63 Naniwamachi, Chuo Ward, Kobe 650-0035）已訂房｜入住 15:00・退房 11:00｜12/19 入住 1 晚・中等雙人床房・禁菸",items:[
+["09:00–11:00","退房、前往神戶、寄放行李","","三宮駅"],
+["11:30","午餐：KOBE STEAK 青斜塔 by 精肉店","KOBE STEAK 青斜塔 by 精肉店Nick。650-0004 Hyogo, Kobe, Chuo Ward, Nakayamatedori 3 Chome-10-12 精肉店 Nick 2F","650-0004 Hyogo, Kobe, Chuo Ward, Nakayamatedori 3 Chome-10-12 精肉店 Nick 2F","r","12/19（六）11:30–15:00，廚房 11:30–14:00（週三休息）｜均價 超過 ¥10,000｜Google 4.6★（208 則）｜可訂位"],
+["13:30–15:00","Bakery RIKI、Flower Bakery、元町商店街","","元町商店街"],
+["15:00–16:30","舊居留地與南京町","老祥記豬肉包","南京町"],
+["16:30","高濱岸壁聖誕市集","Takahama Berth，天色漸暗燈光亮起","Takahama Berth 神戸"],
+["18:30","晚餐：雞soba 座銀","濃郁雞白湯拉麵。從 JR／阪神「元町站」步行約 3 分鐘","鶏soba 座銀 神戸本店","r","每天 10:30–22:30（料理最後點餐 22:00），無固定休息日，12/30–1/3 休業｜不能預約｜不接受信用卡，請備現金｜均價 ¥1,000–1,999"],
+["20:00","諏訪山公園夜景","搭短程交通或計程車上山，再回飯店入住","諏訪山公園"]]},
+{d:"12/20（日）",t:"早餐→神戶機場",stay:"神戶三宮科科飯店（63 Naniwamachi, Chuo Ward, Kobe 650-0035）11:00 前退房",items:[
+["06:30–07:15","飯店早餐","不排早餐名店","63 Naniwamachi, Chuo Ward, Kobe 650-0035"],
+["07:30–07:45","退房，前往機場","","神戸空港"],
+["08:15–08:30","抵達航空公司指定航廈","","神戸空港"],
+["11:30","起飛","不等店開門買伴手禮","神戸空港"]]}];
+const FLAGS=["牛丸慶祝服務等資訊為你提供，出發前再核對官方網站。"];
+const CATS=["機票","住宿","交通（電車／巴士／計程車）","餐飲","購物","景點門票","其他"];
+const LST={"證件":["護照","機票／電子登機證","Visit Japan Web","網路卡或漫遊"],"衣物":["保暖外套","發熱衣","手套、圍巾、帽子","防滑鞋","和服日換穿球鞋"],"電子":["相機與記憶卡","行動電源、充電線","日本轉接頭"],"盥洗":["盥洗用品","保養品","常備藥品"],"出發前確認":["餐廳訂位（牛丸、炭櫓、焼肉）","和服預約與攝影師","神戶住宿資料","天氣預報"]};
+// ===== 以下為功能程式 =====
+function note(t){const m=$("#msg");m.textContent=t;m.style.display="block";setTimeout(()=>m.style.display="none",3000)}
+const $=s=>document.querySelector(s),E=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+const ld=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){note("儲存空間已滿，無法儲存");return false}};
+const gm=q=>"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q);
+const TABS={home:"首頁",plan:"每日行程",budget:"花費記錄",list:"清單",weather:"天氣"};
+function show(id){if(!TABS[id])id="home";document.querySelectorAll("section").forEach(s=>s.classList.toggle("on",s.id==id));[...$("#nav").children].forEach(b=>b.classList.toggle("on",b.dataset.t==id));scrollTo(0,0);try{history.replaceState(null,"","#"+id)}catch(e){}}
+for(const k in TABS){const b=E("button","",TABS[k]);b.dataset.t=k;b.onclick=()=>show(k);$("#nav").append(b)}
+let cur=0;
+function showDay(i){cur=i;[...$("#chips").children].forEach((c,j)=>c.classList.toggle("on",j==i));const D=DAYS[i],box=$("#day");box.innerHTML="";
+const h=E("div","card");h.append(E("div","tm","DAY "+(i+1)+"　"+D.d),E("h2","",D.t),E("div","nt","住宿："+D.stay));
+const rt=E("a","btn","當日路線（Google Maps 大眾運輸）");const pts=D.items.map(x=>x[3]);rt.href="https://www.google.com/maps/dir/"+pts.filter((p,j)=>j==0||p!=pts[j-1]).map(encodeURIComponent).join("/");rt.target="_blank";rt.rel="noopener";h.append(rt);box.append(h);
+const tl=E("div","tl");D.items.forEach((x,j)=>{const it=E("div","it"+(x[4]?" r":""));it.append(E("div","tm",x[0]),E("h3","",x[1]));if(x[2])it.append(E("div","nt",x[2]));
+if(x[4])it.append(x[5]?E("div","nt","🕐 "+x[5]):E("div","warn","營業時間／公休／價格：待確認"));
+const r=E("div","row"),a=E("a","btn","導航 / 地圖");a.href=gm(x[3]);a.target="_blank";a.rel="noopener";r.append(a);
+if(j>0){const b=E("a","btn","從上一站怎麼去");b.href="https://www.google.com/maps/dir/?api=1&travelmode=transit&origin="+encodeURIComponent(D.items[j-1][3])+"&destination="+encodeURIComponent(x[3]);b.target="_blank";b.rel="noopener";r.append(b)}
+it.append(r);tl.append(it)});box.append(tl);
+box.append(E("div","card","注意：冬季早晚氣溫低，預留保暖與雨具；天氣請見「天氣」頁。"))}
+DAYS.forEach((D,i)=>{const c=E("button","chip","DAY "+(i+1)+" "+D.d.slice(0,5));c.onclick=()=>showDay(i);$("#chips").append(c);const q=E("a","chip","DAY "+(i+1)+"｜"+D.d.slice(0,5));q.href="#plan";q.onclick=e=>{e.preventDefault();show("plan");showDay(i)};$("#qn").append(q)});showDay(0);
+FLAGS.forEach(f=>$("#flags").append(E("div","warn","⚠ "+f)));
+$("#cd").textContent=(n=>n>0?n+" 天後出發":n>-7?"旅行中":"已結束")(Math.ceil((new Date("2026-12-14T00:00:00+09:00")-Date.now())/864e5));
+// 預算
+let ed=-1,cf=-1;
+let B=ld("bud",{rate:.21,bud:100000,p:["爸媽","自己"],x:[]});
+const fm=n=>Math.round(n).toLocaleString();
+function rb(){["#cat","#who"].forEach(s=>$(s).innerHTML="");CATS.forEach(c=>$("#cat").append(new Option(c)));B.p.forEach((p,i)=>$("#who").append(new Option(p,i)));
+$("#rate").value=B.rate;$("#p1").value=B.p[0];$("#p2").value=B.p[1];
+const tw=x=>x.cu=="JPY"?x.am*B.rate:x.am,tot=B.x.reduce((s,x)=>s+tw(x),0),pp=[0,1].map(i=>B.x.filter(x=>x.w==i).reduce((s,x)=>s+tw(x),0));
+const bc={};B.x.forEach(x=>bc[x.c]=(bc[x.c]||0)+tw(x));
+$("#sum").innerHTML="";const jp=B.x.filter(x=>x.cu=="JPY").reduce((a,x)=>a+x.am,0);[["總花費（台幣）","NT$ "+fm(tot)],["其中日幣支出","¥ "+fm(jp)],[B.p[0]+" 出的","NT$ "+fm(pp[0])],[B.p[1]+" 出的","NT$ "+fm(pp[1])]].forEach(r=>$("#sum").append(E("div","row",r[0]+"：　"+r[1])));
+$("#sum").append(E("div","nt","分類："+(Object.entries(bc).map(e=>e[0]+" "+fm(e[1])).join("、")||"尚無")));
+const tb=$("#tb");tb.innerHTML="";B.x.forEach((x,i)=>{const tr=E("tr"),t=E("td");
+if(i===ed){const c=E("select"),d=E("input"),a=E("input"),u=E("select"),w=E("select");CATS.forEach(k=>c.append(new Option(k)));c.value=x.c;d.value=x.d;a.type="number";a.value=x.am;["JPY","TWD"].forEach(k=>u.append(new Option(k)));u.value=x.cu;B.p.forEach((p,j)=>w.append(new Option(p,j)));w.value=x.w;[c,d,a,u,w].forEach(el=>{const td=E("td");td.append(el);tr.append(td)});
+const ok=E("button","x","儲存"),no=E("button","x","取消");ok.onclick=()=>{const v=+a.value;if(!v)return note("請輸入金額");Object.assign(x,{c:c.value,d:d.value,am:v,cu:u.value,w:+w.value});ed=-1;sv("bud",B);rb()};no.onclick=()=>{ed=-1;rb()};t.append(ok,no)}
+else{[x.c,x.d,(x.cu=="JPY"?"¥":"NT$")+fm(x.am),"≈NT$"+fm(tw(x)),B.p[x.w]].forEach(v=>tr.append(E("td","",v)));const e=E("button","x","改"),r=E("button","x",i===cf?"確定刪除？":"刪");e.onclick=()=>{ed=i;cf=-1;rb()};r.onclick=()=>{if(cf===i){B.x.splice(i,1);cf=-1;sv("bud",B)}else cf=i;rb()};t.append(e,r)}
+tr.append(t);tb.append(tr)})}
+$("#add").onclick=()=>{const a=+$("#am").value;if(!a)return note("請輸入金額");B.x.push({c:$("#cat").value,d:$("#ds").value,am:a,cu:$("#cu").value,w:+$("#who").value});$("#am").value=$("#ds").value="";sv("bud",B);rb()};
+$("#rate").onchange=()=>{B.rate=+$("#rate").value||B.rate;sv("bud",B);rb()};
+$("#p1").onchange=$("#p2").onchange=()=>{B.p=[$("#p1").value||"爸媽",$("#p2").value||"自己"];sv("bud",B);rb()};rb();
+// 清單
+let L=ld("ck",null);if(!L){L=[];for(const g in LST)LST[g].forEach(t=>L.push({g,t,k:0}))}
+Object.keys(LST).forEach(g=>$("#ng").append(new Option(g)));
+function rl(){const b=$("#ls");b.innerHTML="";const gs=[...new Set(L.map(x=>x.g))];gs.forEach(g=>{const c=E("div","card");c.append(E("h3","",g));L.forEach((x,i)=>{if(x.g!=g)return;const r=E("div","row"),k=E("input");k.type="checkbox";k.checked=!!x.k;k.onchange=()=>{x.k=k.checked;sv("ck",L);rl()};const t=E("span","",x.t);if(x.k)t.style.textDecoration="line-through";const d=E("button","x","✕");d.onclick=()=>{L.splice(i,1);sv("ck",L);rl()};r.append(k,t,d);c.append(r)});b.append(c)})}
+$("#na").onclick=()=>{const t=$("#ni").value.trim();if(!t)return;L.push({g:$("#ng").value,t,k:0});$("#ni").value="";sv("ck",L);rl()};rl();
+// 天氣
+[["大阪","Osaka"],["京都","Kyoto"],["神戶","Kobe"],["箕面（勝尾寺）","Minoh Osaka"]].forEach(([n,q])=>{const c=E("div","card");c.append(E("h3","",n));const r=E("div","row");[["Google 天氣","https://www.google.com/search?q="+encodeURIComponent(q+" weather")],["氣象廳預報與警報","https://www.jma.go.jp/bosai/forecast/"],["Windy 風速／降雪","https://www.windy.com/?"+encodeURIComponent(q)]].forEach(([t,u])=>{const a=E("a","btn",t);a.href=u;a.target="_blank";a.rel="noopener";r.append(a)});c.append(r);$("#wl").append(c)});
+show((location.hash||"#home").slice(1));addEventListener("hashchange",()=>show(location.hash.slice(1)));
+</script></body></html>
