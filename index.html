@@ -18,6 +18,7 @@ section{display:none;padding:18px 16px 60px}section.on{display:block}
 .warn{background:#f6e7c8;color:#5a4320;border-radius:12px;padding:8px 12px;font-size:13px;margin:8px 0}
 input,select{font:inherit;font-size:14px;padding:6px 10px;border:1px solid var(--ln);border-radius:10px;background:var(--c);color:var(--ink);max-width:100%}
 .row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:6px 0}table{width:100%;border-collapse:collapse;font-size:13px}td input,td select{width:100%;min-width:56px;font-size:12px;padding:3px 4px}td,th{padding:6px 4px;border-bottom:1px solid var(--ln);text-align:left}
+textarea{font:inherit;font-size:14px;line-height:1.8;padding:8px 10px;border:1px solid var(--ln);border-radius:10px;background:var(--c);color:var(--ink);width:100%;resize:vertical;margin:6px 0}
 h2{font-weight:400;letter-spacing:.12em;margin:4px 0 10px}a{color:inherit}.x{cursor:pointer;color:var(--mu);border:0;background:none;font-size:14px}
 </style></head><body>
 <nav id="nav"></nav>
@@ -30,6 +31,7 @@ h2{font-weight:400;letter-spacing:.12em;margin:4px 0 10px}a{color:inherit}.x{cur
 <section id="budget"><h2>花費記錄</h2><div id="msg" class="warn" style="display:none"></div><div class="card"><div class="row">匯率 1 JPY = <input id="rate" type="number" step="0.001" size="6" style="width:90px"> TWD</div><div class="row">出錢的人 <input id="p1" style="width:80px"> <input id="p2" style="width:80px"></div><div id="sum"></div></div>
 <div class="card"><div class="row"><select id="cat"></select><input id="ds" placeholder="說明" style="width:120px"><input id="am" type="number" placeholder="金額" style="width:90px"><select id="cu"><option>JPY</option><option>TWD</option></select><select id="who"></select><button class="btn p" id="add">新增</button></div><table id="tb"></table></div></section>
 <section id="list"><h2>旅行清單</h2><div class="row"><input id="ni" placeholder="新增項目"><select id="ng"></select><button class="btn p" id="na">新增</button></div><div id="ls"></div></section>
+<section id="notes"><h2>小筆記</h2><div class="row"><button class="btn p" id="nn">＋ 新增筆記</button></div><div id="nl"></div></section>
 <section id="weather"><h2>天氣</h2><div class="card">此頁面無法串接即時天氣，以下為可靠的查詢連結（不顯示虛構數據）。12 月大阪偏冷，請準備保暖與防風衣物；出發前一天再查一次降雪、風速與警報。</div><div id="wl"></div></section>
 <script>
 // ===== 可自行修改的資料區：[時間,名稱,說明,Google地圖搜尋字,類型(r=餐廳)] =====
@@ -54,7 +56,7 @@ const DAYS=[
 ["08:00","飯店出發","08:00–09:30 搭車前往：飯店→箕面萱野→巴士或計程車→勝尾寺","箕面萱野駅"],
 ["09:30–12:00","勝尾寺","水蜜桃軟糖、雞蛋糕必吃","勝尾寺"],
 ["12:00–13:30","下山、前往梅田","隨身帶小點心","梅田駅"],
-["13:30","午餐：焼肉こじま離れ 大阪梅田","〒530-0014 大阪市北區鶴野町4-4 コープ野村梅田A棟1F（阪急梅田走路10分）；招牌A5黑毛和牛漢堡排，有訂位更順｜電話 +81 6-6940-6550","〒530-0014 Osaka, Kita Ward, Tsurunocho 4-4 A棟1F","r","12/16（三）11:30–14:30、17:00–22:30｜均價 ¥1,000–6,000｜Google 顯示可訂位｜13:30 到店，午餐 14:30 結束，最後點餐時間請確認"],
+["13:30","午餐：焼肉こじま離れ 大阪梅田（已預約）","〒530-0014 大阪市北區鶴野町4-4 コープ野村梅田A棟1F（阪急梅田走路10分）；招牌A5黑毛和牛漢堡排，有訂位更順｜電話 +81 6-6940-6550","〒530-0014 Osaka, Kita Ward, Tsurunocho 4-4 A棟1F","r","12/16（三）11:30–14:30、17:00–22:30｜均價 ¥1,000–6,000｜Google 顯示可訂位｜13:30 到店，午餐 14:30 結束，最後點餐時間請確認"],
 ["15:30","阪急百貨、LUCUA 購物","","LUCUA osaka"],
 ["17:00","grenier 梅田店","爆漿烤布蕾千層當下午茶。530-0017 Osaka, Kita Ward, Kakudacho 8 阪急グランドビル1F（阪急SUN廣場）","〒530-0017 Osaka, Kita Ward, Kakudacho 8 Hankyu Grand Building 1F","r","每天 10:00–20:00｜Google 4.5★（1,099 則）"],
 ["18:00","晚餐：らぁ麺もう利 梅田店","頂級雞白湯拉麵＋叉燒丼。〒530-0001 Umeda 1-1-3 大阪駅前第3ビル B2","〒530-0001 Osaka, Kita Ward, Umeda 1 Chome-1-3 Osaka Station 3 Building B2","r","12/16（三）11:00–15:00、17:00–22:00（週日休息）｜只收現金・不接受訂位｜均價 ¥1,000–2,000｜Google 4.0★（366 則）"],
@@ -66,8 +68,8 @@ const DAYS=[
 ["13:00–14:30","心齋橋購物","","心齋橋筋商店街"],
 ["14:30–15:30","Rikuro 難波本店吃蛋糕","想坐下吃選咖啡室；外帶則換成咖啡休息，蛋糕少量。3 Chome-2-28 Namba, Chuo Ward, Osaka 542-0076","3 Chome-2-28 Namba, Chuo Ward, Osaka 542-0076","r","每天 09:00–20:00"],
 ["15:30–16:30","回飯店休息、放購物袋","","APA Resort Osaka Namba-Eki Mae Tower, 1-2-13 Minatomachi, Naniwa Ward, Osaka 556-0017"],
-["17:30–19:30","生日晚餐：牛丸 心齋橋","大阪市中央區東心齋橋2-8-26 FUKU BLD.2樓B號。含稅每人：和牛吃到飽¥7,700／神戶牛吃到飽¥12,000／蟹＋和牛¥9,900。訂位前看清肉品、時間限制、飲料是否另計；官方未列慶祝服務，座位樓層、電梯、不便盤腿坐需求訂位時確認","牛丸 心齋橋","r","12/17（四）17:00–24:00（料理最後點餐 23:00，飲料 23:30）｜晚餐預算 ¥8,000–9,999｜可網上預訂；需要無麩質請先致電餐廳｜預訂頁註明假日前後公休，12/17 不在日本假日前後"],
-["19:30 後","道頓堀散步、生日合照","累了直接回飯店","道頓堀"]]},
+["18:45","生日晚餐：牛丸 心齋橋（已預約）","大阪市中央區東心齋橋2-8-26 FUKU BLD.2樓B號。含稅每人：和牛吃到飽¥7,700／神戶牛吃到飽¥12,000／蟹＋和牛¥9,900。訂位前看清肉品、時間限制、飲料是否另計；官方未列慶祝服務，座位樓層、電梯、不便盤腿坐需求訂位時確認","牛丸 心齋橋","r","12/17（四）17:00–24:00（料理最後點餐 23:00，飲料 23:30）｜晚餐預算 ¥8,000–9,999｜可網上預訂；需要無麩質請先致電餐廳｜預訂頁註明假日前後公休，12/17 不在日本假日前後"],
+["晚餐後","道頓堀散步、生日合照","累了直接回飯店","道頓堀"]]},
 {d:"12/18（五）",t:"難波八阪神社→黑門市場→新世界",stay:"APA度假飯店 大阪難波站前塔樓（1-2-13 Minatomachi, Naniwa Ward, Osaka 556-0017）已訂房｜入住 15:00・退房 11:00",items:[
 ["09:00–09:45","飯店出發","散步前往難波八阪神社","APA Resort Osaka Namba-Eki Mae Tower, 1-2-13 Minatomachi, Naniwa Ward, Osaka 556-0017"],
 ["09:45–10:30","難波八阪神社","巨大獅子殿；早餐留點胃口","難波八阪神社"],
@@ -80,7 +82,7 @@ const DAYS=[
 ["20:00 後","返回飯店休息","","APA Resort Osaka Namba-Eki Mae Tower, 1-2-13 Minatomachi, Naniwa Ward, Osaka 556-0017"]]},
 {d:"12/19（六）",t:"大阪退房→神戶→南京町→港邊",stay:"神戶三宮科科飯店（63 Naniwamachi, Chuo Ward, Kobe 650-0035）已訂房｜入住 15:00・退房 11:00｜12/19 入住 1 晚・中等雙人床房・禁菸",items:[
 ["09:00–11:00","退房、前往神戶、寄放行李","","三宮駅"],
-["11:30","午餐：KOBE STEAK 青斜塔 by 精肉店","KOBE STEAK 青斜塔 by 精肉店Nick。650-0004 Hyogo, Kobe, Chuo Ward, Nakayamatedori 3 Chome-10-12 精肉店 Nick 2F","650-0004 Hyogo, Kobe, Chuo Ward, Nakayamatedori 3 Chome-10-12 精肉店 Nick 2F","r","12/19（六）11:30–15:00，廚房 11:30–14:00（週三休息）｜均價 超過 ¥10,000｜Google 4.6★（208 則）｜可訂位"],
+["12:00","午餐：KOBE STEAK 青斜塔 by 精肉店（已預約）","KOBE STEAK 青斜塔 by 精肉店Nick。650-0004 Hyogo, Kobe, Chuo Ward, Nakayamatedori 3 Chome-10-12 精肉店 Nick 2F","650-0004 Hyogo, Kobe, Chuo Ward, Nakayamatedori 3 Chome-10-12 精肉店 Nick 2F","r","12/19（六）11:30–15:00，廚房 11:30–14:00（週三休息）｜均價 超過 ¥10,000｜Google 4.6★（208 則）｜可訂位"],
 ["13:30–15:00","Bakery RIKI、Flower Bakery、元町商店街","","元町商店街"],
 ["15:00–16:30","舊居留地與南京町","老祥記豬肉包","南京町"],
 ["16:30","高濱岸壁聖誕市集","Takahama Berth，天色漸暗燈光亮起","Takahama Berth 神戸"],
@@ -93,13 +95,13 @@ const DAYS=[
 ["11:30","起飛","不等店開門買伴手禮","神戸空港"]]}];
 const FLAGS=["牛丸慶祝服務等資訊為你提供，出發前再核對官方網站。"];
 const CATS=["機票","住宿","交通（電車／巴士／計程車）","餐飲","購物","景點門票","其他"];
-const LST={"證件":["護照","機票／電子登機證","Visit Japan Web","網路卡或漫遊"],"衣物":["保暖外套","發熱衣","手套、圍巾、帽子","防滑鞋","和服日換穿球鞋"],"電子":["相機與記憶卡","行動電源、充電線","日本轉接頭"],"盥洗":["盥洗用品","保養品","常備藥品"],"出發前確認":["餐廳訂位（牛丸、炭櫓、焼肉）","和服預約與攝影師","神戶住宿資料","天氣預報"]};
+const LST={"證件":["護照","機票／電子登機證","Visit Japan Web","網路卡或漫遊","手機","身分證","錢包","西瓜卡","大阪周遊卡"],"衣物":["保暖外套","發熱衣","手套、圍巾、帽子","和服日換穿球鞋","衣服褲子","襪子","內衣褲","Nubra","收納袋（髒衣物）","雨傘"],"電子":["相機與記憶卡","行動電源、充電線","日本轉接頭","esim","耳機"],"盥洗":["盥洗用品","保養品","常備藥品","卸粧品","化妝品","防曬","髮圈","隱形眼鏡盒","潤髮"],"出發前確認":["和服預約與攝影師","神戶住宿資料","天氣預報","梅田空中庭園票卷"]};
 // ===== 以下為功能程式 =====
 function note(t){const m=$("#msg");m.textContent=t;m.style.display="block";setTimeout(()=>m.style.display="none",3000)}
 const $=s=>document.querySelector(s),E=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
 const ld=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){note("儲存空間已滿，無法儲存");return false}};
 const gm=q=>"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q);
-const TABS={home:"首頁",plan:"每日行程",budget:"花費記錄",list:"清單",weather:"天氣"};
+const TABS={home:"首頁",plan:"每日行程",budget:"花費記錄",list:"清單",notes:"小筆記",weather:"天氣"};
 function show(id){if(!TABS[id])id="home";document.querySelectorAll("section").forEach(s=>s.classList.toggle("on",s.id==id));[...$("#nav").children].forEach(b=>b.classList.toggle("on",b.dataset.t==id));scrollTo(0,0);try{history.replaceState(null,"","#"+id)}catch(e){}}
 for(const k in TABS){const b=E("button","",TABS[k]);b.dataset.t=k;b.onclick=()=>show(k);$("#nav").append(b)}
 let cur=0;
@@ -138,6 +140,15 @@ let L=ld("ck",null);if(!L){L=[];for(const g in LST)LST[g].forEach(t=>L.push({g,t
 Object.keys(LST).forEach(g=>$("#ng").append(new Option(g)));
 function rl(){const b=$("#ls");b.innerHTML="";const gs=[...new Set(L.map(x=>x.g))];gs.forEach(g=>{const c=E("div","card");c.append(E("h3","",g));L.forEach((x,i)=>{if(x.g!=g)return;const r=E("div","row"),k=E("input");k.type="checkbox";k.checked=!!x.k;k.onchange=()=>{x.k=k.checked;sv("ck",L);rl()};const t=E("span","",x.t);if(x.k)t.style.textDecoration="line-through";const d=E("button","x","✕");d.onclick=()=>{L.splice(i,1);sv("ck",L);rl()};r.append(k,t,d);c.append(r)});b.append(c)})}
 $("#na").onclick=()=>{const t=$("#ni").value.trim();if(!t)return;L.push({g:$("#ng").value,t,k:0});$("#ni").value="";sv("ck",L);rl()};rl();
+// 小筆記（可自行新增、修改、刪除；打字會自動儲存）
+const NOTE0=[{t:"心齋橋必吃",b:"Mooken 焦糖脆皮泡芙\n踊りだこ章魚燒(整隻小章魚的)\n十八番 章魚燒（大章魚燒門面）\nStrawberry Mania（草莓甜點）\nLe croissant（迷你小可頌）\nやさい串巻きなるとやAO（串燒居酒屋）\n千房 大阪燒"},{t:"藥妝",b:"os - sundrug - 瓦屋藥妝-大國"},{t:"神戶",b:"cafe&bar anthem 紗布乳酪蛋糕\nRond sucré cafe 法式甜點焦糖布丁\n本神戶肉森谷商店 炸肉餅"}];
+let N=ld("notes",null)||NOTE0,nd=-1;
+function rn(){const b=$("#nl");b.innerHTML="";N.forEach((n,i)=>{const c=E("div","card"),t=E("input"),a=E("textarea"),r=E("div","row"),d=E("button","x",i===nd?"確定刪除？":"刪除這則");t.value=n.t;t.placeholder="標題";t.style.cssText="width:100%;font-weight:600;font-size:16px";a.value=n.b;a.placeholder="想記什麼都可以";
+const fit=()=>{a.rows=Math.max(4,a.value.split("\n").length+1)};fit();
+t.oninput=()=>{n.t=t.value;sv("notes",N)};a.oninput=()=>{n.b=a.value;sv("notes",N);fit()};
+d.onclick=()=>{if(nd===i){N.splice(i,1);nd=-1;sv("notes",N)}else nd=i;rn()};
+r.append(d);c.append(t,a,r);b.append(c)})}
+$("#nn").onclick=()=>{N.unshift({t:"",b:""});nd=-1;sv("notes",N);rn()};rn();
 // 天氣
 [["大阪","Osaka"],["京都","Kyoto"],["神戶","Kobe"],["箕面（勝尾寺）","Minoh Osaka"]].forEach(([n,q])=>{const c=E("div","card");c.append(E("h3","",n));const r=E("div","row");[["Google 天氣","https://www.google.com/search?q="+encodeURIComponent(q+" weather")],["氣象廳預報與警報","https://www.jma.go.jp/bosai/forecast/"],["Windy 風速／降雪","https://www.windy.com/?"+encodeURIComponent(q)]].forEach(([t,u])=>{const a=E("a","btn",t);a.href=u;a.target="_blank";a.rel="noopener";r.append(a)});c.append(r);$("#wl").append(c)});
 show((location.hash||"#home").slice(1));addEventListener("hashchange",()=>show(location.hash.slice(1)));
